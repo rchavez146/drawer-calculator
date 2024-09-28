@@ -37,8 +37,10 @@ document.addEventListener('DOMContentLoaded', () => {
             <p>Total Amount: $<span class="total-amount">${drawer.totalAmount.toFixed(2)}</span></p>
             <p>Excess Amount: $<span class="excess-amount">${drawer.excessAmount.toFixed(2)}</span></p>
             <p>Amount to Take Out: $<span class="amount-to-take-out">${drawer.amountToTakeOut.toFixed(2)}</span></p>
+            <p>Captured Amount: $<span class="captured-amount">${drawer.capturedAmount ? drawer.capturedAmount.toFixed(2) : 'No amount captured yet.'}</span></p>
             <!-- Buttons -->
             <div class="drawer-buttons">
+                <button class="captureBtn">Capture</button>
                 <button class="resetBtn">Reset</button>
                 <button class="deleteBtn">Delete Drawer</button>
             </div>
@@ -53,6 +55,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 saveData();
                 calculateDepositAmount();
             });
+        });
+
+        // Capture button
+        const captureBtn = drawerDiv.querySelector('.captureBtn');
+        captureBtn.addEventListener('click', () => {
+            captureAmount(drawer); // Capture the current total amount for this drawer
+            updateDrawerDisplay(drawerDiv, drawer); // Update the display to reflect the captured amount
         });
 
         // Reset button
@@ -130,15 +139,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         calculateDrawerTotals(drawer);
-        highlightFieldOnTarget(drawer, input);  // Highlight field if target reached
-    }
-
-    function highlightFieldOnTarget(drawer, input) {
-        if (drawer.totalAmount >= drawer.targetAmount && drawer.targetAmount > 0) {
-            input.classList.add('reached');  // Add green border
-        } else {
-            input.classList.remove('reached');
-        }
     }
 
     function calculateDrawerTotals(drawer) {
@@ -183,11 +183,17 @@ document.addEventListener('DOMContentLoaded', () => {
         const totalAmountDisplay = drawerDiv.querySelector('.total-amount');
         const excessAmountDisplay = drawerDiv.querySelector('.excess-amount');
         const amountToTakeOutDisplay = drawerDiv.querySelector('.amount-to-take-out');
-        const targetAmountInput = drawerDiv.querySelector('.target-amount');
-
+        const capturedAmountDisplay = drawerDiv.querySelector('.captured-amount');
+    
         totalAmountDisplay.textContent = drawer.totalAmount.toFixed(2);
         excessAmountDisplay.textContent = drawer.excessAmount.toFixed(2);
         amountToTakeOutDisplay.textContent = drawer.amountToTakeOut.toFixed(2);
+        capturedAmountDisplay.textContent = drawer.capturedAmount !== undefined ? `${drawer.capturedAmount.toFixed(2)}` : 'No amount captured yet.'; // Removed `$`
+    }
+    
+
+    function captureAmount(drawer) {
+        drawer.capturedAmount = drawer.totalAmount; // Capture the current total amount for this drawer
     }
 
     function resetDrawer(drawer) {
@@ -198,6 +204,7 @@ document.addEventListener('DOMContentLoaded', () => {
         drawer.totalAmount = 0;
         drawer.excessAmount = 0;
         drawer.amountToTakeOut = 0;
+        drawer.capturedAmount = undefined; // Reset captured amount
     }
 
     function clearInputFields(drawerDiv) {
@@ -226,8 +233,10 @@ document.addEventListener('DOMContentLoaded', () => {
             bills: {},
             totalAmount: 0,
             excessAmount: 0,
-            amountToTakeOut: 0
+            amountToTakeOut: 0,
+            capturedAmount: undefined // Initialize captured amount for new drawers
         };
+
         drawersData.push(newDrawer);
         saveData();
         renderDrawers();
